@@ -383,11 +383,11 @@ function renderCoinList(coinsArray, container) {
       <canvas id="chart_${ticker}" height="50"></canvas>
       <div class="actions">
         <input type="number" min="0" step="0.0001" placeholder="Amount to buy" id="buy_${ticker}" />
-        <button onclick="buyCoin('${ticker}')">Buy</button>
+        <button class="buy" onclick="buyCoin('${ticker}')">Buy</button>
       </div>
       <div class="actions">
         <input type="number" min="0" step="0.0001" placeholder="Amount to sell" id="sell_${ticker}" />
-        <button onclick="sellCoin('${ticker}')">Sell</button>
+        <button class="sell" onclick="sellCoin('${ticker}')">Sell</button>
       </div>
     `;
     container.appendChild(coinDiv);

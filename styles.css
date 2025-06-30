@@ -7,3 +7,17 @@
     .positive { color: green; }
     .negative { color: red; }
     canvas { max-width: 100%; height: auto; }
+    .buy{
+        border: 1px solid #ccc; 
+        background: green;
+        border-radius: 8px; 
+        margin: 10px 0; 
+        padding: 10px; 
+    }
+    .sell{
+        border: 1px solid #ccc; 
+        background: red;
+        border-radius: 8px; 
+        margin: 10px 0; 
+        padding: 10px; 
+    }
