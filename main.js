@@ -104,7 +104,6 @@ async function loadUserData() {
     const user = await getUser();
     fakeMoneySpan.textContent = user.fakeMoney.toFixed(2);
     yourCoinsList.innerHTML = '';
-    updateUnrealizedProfit();
     if (!user.coins || Object.keys(user.coins).length === 0) {
       yourCoinsList.innerHTML = '<li>No coins yet</li>';
     } else {
