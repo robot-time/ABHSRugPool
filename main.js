@@ -1,4 +1,4 @@
-// main.js - Optimized version with spam protection and reduced Firebase usage
+// main.js - Fixed version with proper coin rendering
 
 const firebaseConfig = {
   apiKey: "AIzaSyBOffR_iGGEstP4DiIawiLGqCQr9zmc7s8",
@@ -330,6 +330,11 @@ function listenToCoinsRealtime() {
     console.error('Error listening to coins:', error);
     coinsListDiv.innerHTML = '<p>Error loading coins. Please refresh the page.</p>';
   });
+}
+
+// Fixed renderCoinList function
+function renderCoinList(coinsArray, container) {
+  console.log('Rendering coin list...', coinsArray.length, 'coins');
   
   if (!container) {
     console.error('Container element not found for renderCoinList');
@@ -388,31 +393,34 @@ function listenToCoinsRealtime() {
     container.appendChild(coinDiv);
 
     // Render chart
-    if (coin.priceHistory && coin.priceHistory.length > 1) {
-      const chartColor = priceChange >= 0 ? '#28a745' : '#dc3545';
-      try {
-        new Chart(document.getElementById(`chart_${ticker}`), {
-          type: 'line',
-          data: {
-            labels: Array(coin.priceHistory.length).fill(''),
-            datasets: [{
-              label: ticker,
-              data: coin.priceHistory,
-              borderColor: chartColor,
-              backgroundColor: chartColor + '20',
-              tension: 0.3,
-              fill: true
-            }]
-          },
-          options: {
-            scales: { x: { display: false }, y: { display: false } },
-            plugins: { legend: { display: false } }
-          }
-        });
-      } catch (chartError) {
-        console.error('Error creating chart for', ticker, chartError);
+    setTimeout(() => {
+      const chartCanvas = document.getElementById(`chart_${ticker}`);
+      if (chartCanvas && coin.priceHistory && coin.priceHistory.length > 1) {
+        const chartColor = priceChange >= 0 ? '#28a745' : '#dc3545';
+        try {
+          new Chart(chartCanvas, {
+            type: 'line',
+            data: {
+              labels: Array(coin.priceHistory.length).fill(''),
+              datasets: [{
+                label: ticker,
+                data: coin.priceHistory,
+                borderColor: chartColor,
+                backgroundColor: chartColor + '20',
+                tension: 0.3,
+                fill: true
+              }]
+            },
+            options: {
+              scales: { x: { display: false }, y: { display: false } },
+              plugins: { legend: { display: false } }
+            }
+          });
+        } catch (chartError) {
+          console.error('Error creating chart for', ticker, chartError);
+        }
       }
-    }
+    }, 100);
   });
 }
 
@@ -435,8 +443,6 @@ function renderGoodCoins() {
     renderCoinList(coinsArray, goodCoinsListElement);
   }
 }
-
-// Buy/sell functionality with transaction fees and price impact
 
 // Buy/sell functionality with transaction fees and price impact
 globalThis.buyCoin = async function(ticker, inputId) {
