@@ -345,6 +345,7 @@ function listenToCoinsRealtime() {
 
       console.log('Total coins loaded:', Object.keys(allCoinsData).length);
       renderGoodCoins();
+      updateUnrealizedProfit(user);
     }
   }, error => {
     console.error('Error listening to coins:', error);
