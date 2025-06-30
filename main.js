@@ -16,7 +16,7 @@ const auth = firebase.auth();
 
 let currentUser = null;
 let lastCoinCreation = 0; // Track last coin creation time
-const COIN_CREATION_COOLDOWN = 60000; // 1 minute cooldown
+const COIN_CREATION_COOLDOWN = 600000; // 1 minute cooldown
 let lastDataFetch = 0; // Track last data fetch to prevent excessive reads
 const DATA_FETCH_COOLDOWN = 5000; // 5 second minimum between fetches
 let cachedCoinsData = {}; // Cache coins data to reduce reads
