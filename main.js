@@ -16,7 +16,7 @@ const auth = firebase.auth();
 
 let currentUser = null;
 let lastCoinCreation = 0; // Track last coin creation time
-const COIN_CREATION_COOLDOWN = 600000; // 1 minute cooldown
+const COIN_CREATION_COOLDOWN = 60000; // 1 minute cooldown
 let lastDataFetch = 0; // Track last data fetch to prevent excessive reads
 const DATA_FETCH_COOLDOWN = 5000; // 5 second minimum between fetches
 let cachedCoinsData = {}; // Cache coins data to reduce reads
@@ -134,13 +134,11 @@ auth.onAuthStateChanged(user => {
 
     // Load core functions with reduced frequency
     loadUserData();
-    listenToCoinsRealtime();
-    
-    // Update leaderboard and top movers less frequently
     setTimeout(() => {
+      listenToCoinsRealtime();
       updateLeaderboard();
       updateTopMovers();
-    }, 2000);
+    }, 1000);
     
   } else {
     currentUser = null;
@@ -234,9 +232,105 @@ document.getElementById('createCoinBtn').addEventListener('click', async () => {
   }
 });
 
+function updateLeaderboard() {
+  const now = Date.now();
+  if (now - lastLeaderboardUpdate < 15000) return; // Minimum 15 seconds between updates
+  lastLeaderboardUpdate = now;
+  
+  db.collection('users').orderBy('fakeMoney', 'desc').limit(10).get().then(snapshot => {
+    const list = document.getElementById('leaderboard');
+    if (!list) return;
+    
+    list.innerHTML = '';
+    snapshot.forEach(doc => {
+      const u = doc.data();
+      list.innerHTML += `<li>${u.name || 'Unknown'}: ${u.fakeMoney.toFixed(2)}</li>`;
+    });
+  }).catch(error => {
+    console.error('Error updating leaderboard:', error);
+  });
+}
+
+function updateTopMovers() {
+  const now = Date.now();
+  if (now - lastTopMoversUpdate < 15000) return; // Minimum 15 seconds between updates
+  lastTopMoversUpdate = now;
+  
+  // Use cached data instead of new query when possible
+  if (Object.keys(allCoinsData).length > 0) {
+    const changes = [];
+    Object.entries(allCoinsData).forEach(([ticker, coin]) => {
+      if (!coin.previousPrice || coin.previousPrice === 0) return;
+      const change = ((coin.price - coin.previousPrice) / coin.previousPrice) * 100;
+      changes.push({
+        name: coin.name,
+        ticker: ticker,
+        price: coin.price.toFixed(4),
+        change
+      });
+    });
+    
+    const topGainers = [...changes].sort((a, b) => b.change - a.change).slice(0, 3);
+    const topLosers = [...changes].sort((a, b) => a.change - b.change).slice(0, 3);
+
+    let html = `<strong>📈 Top Gainers:</strong><ul>`;
+    topGainers.forEach(c => {
+      html += `<li class="positive">${c.name} (${c.ticker}): ${c.price} (+${c.change.toFixed(2)}%)</li>`;
+    });
+    html += `</ul><strong>📉 Top Losers:</strong><ul>`;
+    topLosers.forEach(c => {
+      html += `<li class="negative">${c.name} (${c.ticker}): ${c.price} (${c.change.toFixed(2)}%)</li>`;
+    });
+    html += `</ul>`;
+    
+    const topMoversElement = document.getElementById('topMovers');
+    if (topMoversElement) {
+      topMoversElement.innerHTML = html;
+    }
+  }
+}
+
 let allCoinsData = {};  // store all coins by ticker for filtering
 
-function renderCoinList(coinsArray, container) {
+function listenToCoinsRealtime() {
+  console.log('Listening to coins realtime...');
+  
+  // Clean up existing listener
+  if (unsubscribeCoins) {
+    unsubscribeCoins();
+  }
+  
+  // Set up new listener with caching
+  unsubscribeCoins = db.collection('coins').onSnapshot(snapshot => {
+    console.log('Coins snapshot received:', snapshot.size);
+    
+    // Only update if there are actual changes
+    if (!snapshot.metadata.hasPendingWrites && !snapshot.metadata.fromCache) {
+      allCoinsData = {}; // reset
+
+      if (snapshot.empty) {
+        console.log('No coins found in database');
+        coinsListDiv.innerHTML = '<p>No coins yet.</p>';
+        const goodCoinsListElement = document.getElementById('goodCoinsList');
+        if (goodCoinsListElement) {
+          goodCoinsListElement.innerHTML = '<p>No coins yet.</p>';
+        }
+        return;
+      }
+
+      snapshot.forEach(doc => {
+        allCoinsData[doc.id] = doc.data();
+        console.log('Added coin to allCoinsData:', doc.id);
+      });
+
+      console.log('Total coins loaded:', Object.keys(allCoinsData).length);
+      renderGoodCoins();
+    }
+  }, error => {
+    console.error('Error listening to coins:', error);
+    coinsListDiv.innerHTML = '<p>Error loading coins. Please refresh the page.</p>';
+  });
+  
   if (!container) {
     console.error('Container element not found for renderCoinList');
     return;
@@ -342,103 +436,7 @@ function renderGoodCoins() {
   }
 }
 
-function listenToCoinsRealtime() {
-  console.log('Listening to coins realtime...');
-  
-  // Clean up existing listener
-  if (unsubscribeCoins) {
-    unsubscribeCoins();
-  }
-  
-  // Set up new listener with caching
-  unsubscribeCoins = db.collection('coins').onSnapshot(snapshot => {
-    console.log('Coins snapshot received:', snapshot.size);
-    
-    // Only update if there are actual changes
-    if (!snapshot.metadata.hasPendingWrites && !snapshot.metadata.fromCache) {
-      allCoinsData = {}; // reset
-
-      if (snapshot.empty) {
-        console.log('No coins found in database');
-        coinsListDiv.innerHTML = '<p>No coins yet.</p>';
-        const goodCoinsListElement = document.getElementById('goodCoinsList');
-        if (goodCoinsListElement) {
-          goodCoinsListElement.innerHTML = '<p>No coins yet.</p>';
-        }
-        return;
-      }
-
-      snapshot.forEach(doc => {
-        allCoinsData[doc.id] = doc.data();
-        console.log('Added coin to allCoinsData:', doc.id);
-      });
-
-      console.log('Total coins loaded:', Object.keys(allCoinsData).length);
-      renderGoodCoins();
-    }
-  }, error => {
-    console.error('Error listening to coins:', error);
-    coinsListDiv.innerHTML = '<p>Error loading coins. Please refresh the page.</p>';
-  });
-}
-
-function updateLeaderboard() {
-  const now = Date.now();
-  if (now - lastLeaderboardUpdate < 15000) return; // Minimum 15 seconds between updates
-  lastLeaderboardUpdate = now;
-  
-  db.collection('users').orderBy('fakeMoney', 'desc').limit(10).get().then(snapshot => {
-    const list = document.getElementById('leaderboard');
-    if (!list) return;
-    
-    list.innerHTML = '';
-    snapshot.forEach(doc => {
-      const u = doc.data();
-      list.innerHTML += `<li>${u.name || 'Unknown'}: $${u.fakeMoney.toFixed(2)}</li>`;
-    });
-  }).catch(error => {
-    console.error('Error updating leaderboard:', error);
-  });
-}
-
-function updateTopMovers() {
-  const now = Date.now();
-  if (now - lastTopMoversUpdate < 15000) return; // Minimum 15 seconds between updates
-  lastTopMoversUpdate = now;
-  
-  // Use cached data instead of new query when possible
-  if (Object.keys(allCoinsData).length > 0) {
-    const changes = [];
-    Object.entries(allCoinsData).forEach(([ticker, coin]) => {
-      if (!coin.previousPrice || coin.previousPrice === 0) return;
-      const change = ((coin.price - coin.previousPrice) / coin.previousPrice) * 100;
-      changes.push({
-        name: coin.name,
-        ticker: ticker,
-        price: coin.price.toFixed(4),
-        change
-      });
-    });
-    
-    const topGainers = [...changes].sort((a, b) => b.change - a.change).slice(0, 3);
-    const topLosers = [...changes].sort((a, b) => a.change - b.change).slice(0, 3);
-
-    let html = `<strong>📈 Top Gainers:</strong><ul>`;
-    topGainers.forEach(c => {
-      html += `<li class="positive">${c.name} (${c.ticker}): $${c.price} (+${c.change.toFixed(2)}%)</li>`;
-    });
-    html += `</ul><strong>📉 Top Losers:</strong><ul>`;
-    topLosers.forEach(c => {
-      html += `<li class="negative">${c.name} (${c.ticker}): $${c.price} (${c.change.toFixed(2)}%)</li>`;
-    });
-    html += `</ul>`;
-    
-    const topMoversElement = document.getElementById('topMovers');
-    if (topMoversElement) {
-      topMoversElement.innerHTML = html;
-    }
-  }
-}
+// Buy/sell functionality with transaction fees and price impact
 
 // Buy/sell functionality with transaction fees and price impact
 globalThis.buyCoin = async function(ticker, inputId) {
