@@ -175,7 +175,7 @@ document.getElementById('createCoinBtn').addEventListener('click', async () => {
 
   const name = document.getElementById('coinName').value.trim();
   const ticker = document.getElementById('coinTicker').value.trim().toUpperCase();
-  const price = 1.00;
+  const price = 0.001;
 
   if (!name || !ticker) return alert('Please enter valid coin details');
   if (ticker.length > 10) return alert('Ticker must be 10 characters or less');
@@ -467,7 +467,7 @@ globalThis.buyCoin = async function(ticker, inputId) {
 
       const coin = coinDoc.data();
       const user = userDoc.data();
-      const totalCost = coin.price * amount * 1.01; // 1% fee
+      const totalCost = coin.price * amount * 1.03; // 1% fee
 
       if (user.fakeMoney < totalCost) throw 'Not enough fake money';
 
@@ -527,7 +527,7 @@ globalThis.sellCoin = async function(ticker) {
       const userCoins = user.coins?.[ticker] || 0;
       if (userCoins < amount) throw 'Not enough coins to sell';
 
-      const proceeds = coin.price * amount * 0.99; // 1% fee
+      const proceeds = coin.price * amount * 0.97; // 1% fee
       let newPrice = Math.max(coin.price - 0.005 * amount, 0.01);
       const newFakeMoney = user.fakeMoney + proceeds;
       const newCoinAmount = userCoins - amount;
@@ -586,7 +586,7 @@ async function randomFluctuateCoins() {
       let newPrice = coin.price * (1 + randomPercent);
 
       // Clamp to reasonable bounds
-      newPrice = Math.max(0.01, Math.min(newPrice, 1000));
+      newPrice = Math.max(0.00001, Math.min(newPrice, 100000));
 
       const updatedHistory = [...(coin.priceHistory || []), newPrice];
       if (updatedHistory.length > 50) updatedHistory.shift();
