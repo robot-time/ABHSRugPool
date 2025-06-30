@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Collection Of Coins 🪙</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; background: #f4f4f4; color: #333; }
+    input, button { padding: 8px; margin: 5px 0; width: 100%; }
+    .coin { border: 1px solid #ccc; background: white; border-radius: 8px; margin: 10px 0; padding: 10px; }
+    .actions { display: flex; gap: 10px; }
+    .actions input, .actions button { flex: 1; }
+    #authButtons { margin-bottom: 20px; }
+    .positive { color: green; }
+    .negative { color: red; }
+    canvas { max-width: 100%; height: auto; }
+  </style>
+</head>
+<body>
+
+<h1>The Collection Of Coins 🪙</h1>
+
+<div id="authButtons">
+  <button id="signInBtn">Sign In with Google</button>
+  <button id="signOutBtn" style="display:none;">Sign Out</button>
+  <p id="userInfo"></p>
+</div>
+
+<div id="wallet" style="display:none;">
+  <h2>Your Wallet</h2>
+  <p>Fake Money Balance: $<span id="fakeMoney">0</span></p>
+  <h3>Your Coins:</h3>
+  <ul id="yourCoins"></ul>
+</div>
+
+<hr />
+
+<div id="coinCreation" style="display:none;">
+  <h2>Create a Coin</h2>
+  <input id="coinName" placeholder="Coin Name (e.g. MilesCoin)" />
+  <input id="coinTicker" placeholder="Ticker (e.g. MLC)" maxlength="5" />
+  <button id="createCoinBtn">Create Coin</button>
+</div>
+
+<hr />
+
+<h2>Top Movers</h2>
+<div id="topMovers"><p>Loading...</p></div>
+
+<hr />
+
+<h2>Leaderboard</h2>
+<ul id="leaderboard"></ul>
+
+<hr />
+
+<div>
+  <h2>Available Coins</h2>
+
+  <div id="coinsList"></div>
+</div>
+
+<center><a href="doc.html">Documentation of the system</a></center>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script>
+  // Load your main Firebase app logic from separate file for readability
+</script>
+<script src="main.js"></script>
+
+</body>
+</html>
