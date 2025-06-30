@@ -1,4 +1,4 @@
-# 💰 Fake Stock Simulator
+# 💰 ABHS Rug Pool
 
 A real-time, Firebase-backed simulation of a cryptocurrency market where users can create fake coins, trade them with pretend money, and watch the economy go wild.
 
