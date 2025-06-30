@@ -1,0 +1,9 @@
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; background: #f4f4f4; color: #333; }
+    input, button { padding: 8px; margin: 5px 0; width: 100%; }
+    .coin { border: 1px solid #ccc; background: white; border-radius: 8px; margin: 10px 0; padding: 10px; }
+    .actions { display: flex; gap: 10px; }
+    .actions input, .actions button { flex: 1; }
+    #authButtons { margin-bottom: 20px; }
+    .positive { color: green; }
+    .negative { color: red; }
+    canvas { max-width: 100%; height: auto; }
