@@ -9,15 +9,16 @@
     canvas { max-width: 100%; height: auto; }
     .buy{
         border: 1px solid #ccc; 
-        background: green;
+        background: #28a745;
         border-radius: 8px; 
         margin: 10px 0; 
         padding: 10px; 
     }
     .sell{
         border: 1px solid #ccc; 
-        background: red;
+        background: #dc3545;
         border-radius: 8px; 
         margin: 10px 0; 
         padding: 10px; 
     }
+    
