@@ -85,6 +85,21 @@ async function loadUserData() {
   try {
     const user = await getUser();
     fakeMoneySpan.textContent = user.fakeMoney.toFixed(2);
+    let unrealizedProfit = user.fakeMoney; // Start with the user's cash
+    if (user.coins && Object.keys(user.coins).length > 0) {
+    for (const [ticker, amount] of Object.entries(user.coins)) {
+        const coin = allCoinsData[ticker];
+        if (coin && coin.price) {
+        unrealizedProfit += amount * coin.price;
+        }
+    }
+    }
+
+    const unrealizedProfitSpan = document.getElementById('unrealizedProfit');
+    if (unrealizedProfitSpan) {
+    unrealizedProfitSpan.textContent = unrealizedProfit.toFixed(2);
+    }
+
     yourCoinsList.innerHTML = '';
     if (!user.coins || Object.keys(user.coins).length === 0) {
       yourCoinsList.innerHTML = '<li>No coins yet</li>';
