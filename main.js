@@ -102,6 +102,9 @@ async function getUser() {
 async function loadUserData() {
   try {
     const user = await getUser();
+    cachedUser = user;
+    updateUnrealizedProfit(user);
+
     fakeMoneySpan.textContent = user.fakeMoney.toFixed(2);
     yourCoinsList.innerHTML = '';
     if (!user.coins || Object.keys(user.coins).length === 0) {
@@ -344,7 +347,7 @@ function listenToCoinsRealtime() {
 
       console.log('Total coins loaded:', Object.keys(allCoinsData).length);
       renderGoodCoins();
-      updateUnrealizedProfit(user);
+      if (cachedUser) updateUnrealizedProfit(cachedUser);
     }
   }, error => {
     console.error('Error listening to coins:', error);
